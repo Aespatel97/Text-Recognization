@@ -158,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         borderSide: BorderSide(color: Colors.transparent)),
                     elevation: 0.0,
                     child: Text(
-                      'Read Text',
+                      'Read Texts',
                       style: TextStyle(color: Colors.white),
                     ),
                     onPressed: () {
