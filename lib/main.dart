@@ -1,10 +1,18 @@
 import 'dart:io';
+import 'package:camera/camera.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
+import 'package:textrecognization/camera.dart';
 import 'package:textrecognization/hello.dart';
 
-void main() => runApp(MyApp());
+void main() {
+   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(new MyApp());
+  });
+  }
 
 class MyApp extends StatelessWidget {
   @override
@@ -33,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> {
   File pickimage;
   List<String> texts = List();
   bool imageLoaded = false;
+  var firstCamera;
   String text = "";
   Future pickImage() async {
     var tempstore = await ImagePicker.pickImage(source: ImageSource.camera);
@@ -42,6 +51,19 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  @override
+  void initState()   {
+    super.initState();
+    hetcamera();
+  }
+
+  hetcamera() async {
+    final cameras = await availableCameras();
+
+    // Get a specific camera from the list of available cameras.
+    firstCamera = cameras.first;
+  }
+
   Future readText() async {
     text = "";
     texts = [];
@@ -49,11 +71,22 @@ class _MyHomePageState extends State<MyHomePage> {
     TextRecognizer reconizetext = FirebaseVision.instance.textRecognizer();
     VisionText readtext = await reconizetext.processImage(ourimage);
 
-    for (TextBlock block in readtext.blocks) {
-      // print("++++++++++++++++${block.text.split(",").toList().length}");
-      texts = block.text.split(",").toList();
-      // print(texts);
-}
+    // for (TextBlock block in readtext.blocks) {
+    //   print(block.lines[0].text);
+    //   // print("++++++++++++++++${block.text.split(",").toList().length}");
+    //   texts = block.text.split(",").toList();
+    //   // print(texts);
+    // }
+     for (TextBlock block in readtext.blocks) {
+      for (TextLine line in block.lines) {
+        for (TextElement word in line.elements) {
+          // print(word.text);
+          texts.add(word.text);
+            text += word.text +" ";
+            print(text);
+        }
+      }
+    }
   }
 
   @override
@@ -125,9 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     texts = [];
                     pickImage().then((onValue) {
                       print(onValue.runtimeType);
-                      if (pickimage != null) {
-                        readText().then((onValue) {});
-                      }
+                     
                     });
                   },
                 ),
@@ -162,15 +193,53 @@ class _MyHomePageState extends State<MyHomePage> {
                       style: TextStyle(color: Colors.white),
                     ),
                     onPressed: () {
-                      Navigator.push(
+                       if (pickimage != null) {
+                        readText().then((onValue) {
+                            Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => ShowText(
-                                    abc: texts,
+                                    abc: text,
                                   )));
+                        });
+                      }
+                    
                     }),
               ),
-              //  SizedBox(height: 20,),
+              SizedBox(
+                height: 20,
+              ),
+              // Container(
+              //   height: 50,
+              //   width: 150,
+              //   decoration: BoxDecoration(
+              //       color: Colors.blue,
+              //       borderRadius: BorderRadius.only(
+              //           topLeft: Radius.circular(10),
+              //           bottomRight: Radius.circular(10))),
+              //   child: MaterialButton(
+              //       color: Colors.blue,
+              //       minWidth: 150,
+              //       height: 50,
+              //       shape: OutlineInputBorder(
+              //           borderRadius: BorderRadius.only(
+              //               topLeft: Radius.circular(10),
+              //               bottomRight: Radius.circular(10)),
+              //           borderSide: BorderSide(color: Colors.transparent)),
+              //       elevation: 0.0,
+              //       child: Text(
+              //         'Open Camera',
+              //         style: TextStyle(color: Colors.white),
+              //       ),
+              //       onPressed: () {
+              //         Navigator.push(
+              //             context,
+              //             MaterialPageRoute(
+              //                 builder: (context) => TakePictureScreen(
+              //                       camera: firstCamera,
+              //                     )));
+              //       }),
+              // ),
               // if(!imageLoaded)...[
               //  Text('data'),
               //  Text('djhuv'),
