@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
-import 'package:textrecognization/camera.dart';
+// import 'package:textrecognization/camera.dart';
 import 'package:textrecognization/hello.dart';
 
 void main() {
@@ -71,19 +71,16 @@ class _MyHomePageState extends State<MyHomePage> {
     TextRecognizer reconizetext = FirebaseVision.instance.textRecognizer();
     VisionText readtext = await reconizetext.processImage(ourimage);
 
-    // for (TextBlock block in readtext.blocks) {
-    //   print(block.lines[0].text);
-    //   // print("++++++++++++++++${block.text.split(",").toList().length}");
-    //   texts = block.text.split(",").toList();
-    //   // print(texts);
-    // }
+     
      for (TextBlock block in readtext.blocks) {
       for (TextLine line in block.lines) {
+        text += line.text;
+        print(line.text);
         for (TextElement word in line.elements) {
           // print(word.text);
           texts.add(word.text);
-            text += word.text +" ";
-            print(text);
+            // text += word.text +" ";
+            // print(text);
         }
       }
     }
